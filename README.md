@@ -1,36 +1,41 @@
-# 🤖 DSA AI Coder — Assistente de Programação em Python
+# 🤖 PyCoder — Assistente de Programação em Python
 
-Assistente de programação com interface web moderna (tema escuro) que permite **alternar entre múltiplos provedores de LLM** (Groq, OpenAI e Gemini), informando sua chave de API diretamente na interface.
-
-> Estudo de caso estendido: além da versão original em Streamlit, ganhou um frontend próprio em FastAPI.
-
-![Demonstração](EstudoCaso1.jpg)
+Assistente de programação com interface web moderna (tema escuro) que permite **alternar entre múltiplos provedores de LLM** (Groq, OpenAI, Gemini, Anthropic e OpenRouter), informando sua chave de API diretamente na interface.
 
 ---
 
 ## ✨ Funcionalidades
 
-- Chat de apoio à programação Python
-- Suporte a múltiplos provedores: **Groq, OpenAI, Gemini**
-- Chave de API informada na própria interface (não fica salva no código)
-- Duas interfaces: **Web Premium (FastAPI)** e **Streamlit (original)**
+- Chat de apoio à programação Python.
+- Suporte a múltiplos provedores: **Groq, OpenAI, Gemini, Anthropic, OpenRouter**.
+- Chave de API informada na própria interface e salva localmente no navegador (não fica salva no código/servidor).
+- Interface web premium desenvolvida em **FastAPI** e **Uvicorn** (HTML/CSS/JS nativo).
+
+---
 
 ## 🛠️ Tecnologias
 
 - **Python** · **FastAPI** · **Uvicorn** · **httpx**
-- Streamlit (versão original)
 - Frontend em HTML/CSS/JS
 
-## 🚀 Como rodar (interface web)
+---
 
-```bash
-pip install fastapi uvicorn httpx
-uvicorn app:app --reload
-```
+## 🚀 Como Rodar
 
-Acesse `http://localhost:8000`, escolha o provedor e cole sua chave de API na interface.
+1. Instale as dependências:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-> 🔒 As chaves de API são inseridas em tempo de execução pelo usuário — nenhuma chave é versionada.
+2. Inicie o servidor FastAPI:
+   ```bash
+   uvicorn app:app --reload
+   ```
+
+3. Acesse no seu navegador:
+   👉 **http://localhost:8000**
+
+---
 
 ## 👤 Autor
 **Jorge Sereghetti** — Especialista em IA e Automação para Negócios

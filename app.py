@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import httpx
 
-app = FastAPI(title="DSA AI Coder Backend")
+app = FastAPI(title="PyCoder Backend")
 
 # Enable CORS for development
 app.add_middleware(
@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-CUSTOM_PROMPT = """Você é o "DSA Coder", um assistente de IA especialista em programação, com foco principal em Python. Sua missão é ajudar desenvolvedores iniciantes com dúvidas de programação de forma clara, precisa e útil.
+CUSTOM_PROMPT = """Você é o "PyCoder", um assistente de IA especialista em programação, com foco principal em Python. Sua missão é ajudar desenvolvedores iniciantes com dúvidas de programação de forma clara, precisa e útil.
 
 REGRAS DE OPERAÇÃO:
 1.  **Foco em Programação**: Responda apenas a perguntas relacionadas a programação, algoritmos, estruturas de dados, bibliotecas e frameworks. Se o usuário perguntar sobre outro assunto, responda educadamente que seu foco é exclusivamente em auxiliar com código.
@@ -54,7 +54,7 @@ async def call_groq_or_openai(
     }
     if is_openrouter:
         headers["HTTP-Referer"] = "http://localhost:8000"
-        headers["X-Title"] = "DSA AI Coder"
+        headers["X-Title"] = "PyCoder"
     
     payload = {
         "model": model,

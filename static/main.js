@@ -137,8 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load settings from localStorage
 function loadSettings() {
-    const savedProvider = localStorage.getItem('dsa_provider');
-    const savedTemp = localStorage.getItem('dsa_temperature');
+    const savedProvider = localStorage.getItem('pycoder_provider');
+    const savedTemp = localStorage.getItem('pycoder_temperature');
     
     if (savedProvider) {
         appState.provider = savedProvider;
@@ -149,7 +149,7 @@ function loadSettings() {
     }
 
     // Load appropriate model
-    const savedModel = localStorage.getItem(`dsa_model_${appState.provider}`);
+    const savedModel = localStorage.getItem(`pycoder_model_${appState.provider}`);
     if (savedModel) {
         appState.model = savedModel;
     } else {
@@ -159,7 +159,7 @@ function loadSettings() {
 
 // Load chats from localStorage
 function loadChats() {
-    const savedChats = localStorage.getItem('dsa_chats');
+    const savedChats = localStorage.getItem('pycoder_chats');
     if (savedChats) {
         try {
             appState.chats = JSON.parse(savedChats);
@@ -174,7 +174,7 @@ function loadChats() {
 
 // Save chats list to localStorage
 function saveChats() {
-    localStorage.setItem('dsa_chats', JSON.stringify(appState.chats));
+    localStorage.setItem('pycoder_chats', JSON.stringify(appState.chats));
 }
 
 
@@ -254,9 +254,9 @@ function loadConversation(chatId) {
     appState.messages = [...chat.messages];
     
     // Sync models & keys
-    localStorage.setItem('dsa_provider', appState.provider);
-    localStorage.setItem(`dsa_model_${appState.provider}`, appState.model);
-    localStorage.setItem('dsa_temperature', appState.temperature);
+    localStorage.setItem('pycoder_provider', appState.provider);
+    localStorage.setItem(`pycoder_model_${appState.provider}`, appState.model);
+    localStorage.setItem('pycoder_temperature', appState.temperature);
     
     // Update UI elements
     updateActiveModelBadge();
@@ -290,7 +290,7 @@ function startNewConversation() {
     appState.messages = [];
     
     // Restore default settings of current active provider/model
-    const savedModel = localStorage.getItem(`dsa_model_${appState.provider}`);
+    const savedModel = localStorage.getItem(`pycoder_model_${appState.provider}`);
     if (savedModel) {
         appState.model = savedModel;
     } else {
@@ -346,8 +346,8 @@ function selectModel(providerId, modelId) {
     appState.provider = providerId;
     appState.model = modelId;
     
-    localStorage.setItem('dsa_provider', providerId);
-    localStorage.setItem(`dsa_model_${providerId}`, modelId);
+    localStorage.setItem('pycoder_provider', providerId);
+    localStorage.setItem(`pycoder_model_${providerId}`, modelId);
     
     // If active conversation exists, update its configuration
     if (appState.activeChatId) {
@@ -492,11 +492,11 @@ function setupEventListeners() {
 // Open Settings Modal & Populate Values from LocalStorage
 function openSettingsModal() {
     // Load keys
-    modalGroqKey.value = localStorage.getItem('dsa_key_groq') || '';
-    modalOpenaiKey.value = localStorage.getItem('dsa_key_openai') || '';
-    modalGeminiKey.value = localStorage.getItem('dsa_key_gemini') || '';
-    modalAnthropicKey.value = localStorage.getItem('dsa_key_anthropic') || '';
-    modalOpenrouterKey.value = localStorage.getItem('dsa_key_openrouter') || '';
+    modalGroqKey.value = localStorage.getItem('pycoder_key_groq') || '';
+    modalOpenaiKey.value = localStorage.getItem('pycoder_key_openai') || '';
+    modalGeminiKey.value = localStorage.getItem('pycoder_key_gemini') || '';
+    modalAnthropicKey.value = localStorage.getItem('pycoder_key_anthropic') || '';
+    modalOpenrouterKey.value = localStorage.getItem('pycoder_key_openrouter') || '';
     
     // Load temperature
     modalTemp.value = appState.temperature;
@@ -517,14 +517,14 @@ function closeSettingsModal() {
 
 // Save Modal values to LocalStorage and State
 function saveModalSettings() {
-    localStorage.setItem('dsa_key_groq', modalGroqKey.value.trim());
-    localStorage.setItem('dsa_key_openai', modalOpenaiKey.value.trim());
-    localStorage.setItem('dsa_key_gemini', modalGeminiKey.value.trim());
-    localStorage.setItem('dsa_key_anthropic', modalAnthropicKey.value.trim());
-    localStorage.setItem('dsa_key_openrouter', modalOpenrouterKey.value.trim());
+    localStorage.setItem('pycoder_key_groq', modalGroqKey.value.trim());
+    localStorage.setItem('pycoder_key_openai', modalOpenaiKey.value.trim());
+    localStorage.setItem('pycoder_key_gemini', modalGeminiKey.value.trim());
+    localStorage.setItem('pycoder_key_anthropic', modalAnthropicKey.value.trim());
+    localStorage.setItem('pycoder_key_openrouter', modalOpenrouterKey.value.trim());
     
     appState.temperature = parseFloat(modalTemp.value);
-    localStorage.setItem('dsa_temperature', appState.temperature);
+    localStorage.setItem('pycoder_temperature', appState.temperature);
     
     // If active conversation exists, update its temperature configuration
     if (appState.activeChatId) {
@@ -581,7 +581,7 @@ function appendMessageRow(role, content) {
 
     const isUser = role === 'user';
     const avatarIcon = isUser ? 'user' : 'bot';
-    const senderLabel = isUser ? 'Você' : 'DSA Coder';
+    const senderLabel = isUser ? 'Você' : 'PyCoder';
 
     // Render markdown to HTML
     let renderedHtml = content;
@@ -682,7 +682,7 @@ function showTypingIndicator() {
             <i data-lucide="bot"></i>
         </div>
         <div class="message-content-wrapper">
-            <span class="sender-name">DSA Coder</span>
+            <span class="sender-name">PyCoder</span>
             <div class="typing-indicator">
                 <div class="typing-dot"></div>
                 <div class="typing-dot"></div>
@@ -710,7 +710,7 @@ function scrollToBottom() {
 
 // Send user message to the API
 async function sendMessage(text) {
-    const apiKey = localStorage.getItem(`dsa_key_${appState.provider}`);
+    const apiKey = localStorage.getItem(`pycoder_key_${appState.provider}`);
     if (!apiKey || apiKey.trim() === '') {
         alert(`Por favor, insira a sua API Key para o provedor ${appState.provider.toUpperCase()} nas Configurações.`);
         openSettingsModal();
