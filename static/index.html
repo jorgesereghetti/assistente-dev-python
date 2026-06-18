@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA AI Coder - Assistente Python</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Prism.js Dark Theme -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="toggle-sidebar-btn" id="toggleSidebarBtnSidebar" title="Recolher Barra Lateral">
+                    <i data-lucide="panel-left"></i>
+                </button>
+                <div class="logo">
+                    <i data-lucide="terminal" class="logo-icon"></i>
+                    <span>DSA AI Coder</span>
+                </div>
+                <button class="mobile-close-btn" id="mobileCloseBtn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-content">
+                <button id="newChatBtn" class="btn btn-primary btn-new-chat">
+                    <i data-lucide="plus"></i>
+                    Nova Conversa
+                </button>
+                
+                <hr class="divider">
+                
+                <div class="history-section">
+                    <h3>Conversas Recentes</h3>
+                    <div class="history-list" id="historyList">
+                        <!-- Populated dynamically by main.js -->
+                    </div>
+                </div>
+
+                <div class="sidebar-footer" style="margin-top: auto;">
+                    <p>Desenvolvido para auxiliar nas suas dúvidas em Python.</p>
+                    <a href="https://www.datascienceacademy.com.br" target="_blank" class="dsa-link">
+                        <i data-lucide="external-link"></i>
+                        Data Science Academy
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            <!-- Top bar -->
+            <header class="chat-header">
+                <button class="toggle-sidebar-btn" id="toggleSidebarBtn" title="Mostrar Barra Lateral">
+                    <i data-lucide="panel-left"></i>
+                </button>
+                <button class="mobile-toggle-btn" id="mobileToggleBtn">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="header-title-container">
+                    <h2>Assistente Pessoal de Programação Python</h2>
+                    <span class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Pronto</span>
+                    </span>
+                </div>
+            </header>
+
+            <!-- Chat messages wrapper -->
+            <section class="messages-container" id="messagesContainer">
+                <!-- Welcome screen -->
+                <div class="welcome-screen" id="welcomeScreen">
+                    <div class="welcome-icon">
+                        <i data-lucide="bot"></i>
+                    </div>
+                    <h1>Olá! Sou o DSA Coder.</h1>
+                    <p>Pergunte-me qualquer dúvida sobre Python, como sintaxe, estruturas de dados, algoritmos ou bibliotecas.</p>
+                    
+                </div>
+
+                <!-- Chat history items will be rendered here -->
+            </section>
+
+            <!-- Chat input area -->
+            <footer class="input-area">
+                <div class="input-toolbar">
+                    <!-- Model Selector Dropdown Trigger -->
+                    <div class="model-dropdown-container">
+                        <button type="button" id="modelSelectorBtn" class="toolbar-btn">
+                            <i data-lucide="bot"></i>
+                            <span id="activeModelLabel">Carregando...</span>
+                            <i data-lucide="chevron-down" class="chevron-icon"></i>
+                        </button>
+                        <div class="model-dropdown-menu hidden" id="modelDropdownMenu">
+                            <!-- Populated dynamically by main.js -->
+                        </div>
+                    </div>
+
+                    <!-- Settings Button -->
+                    <button type="button" id="settingsBtn" class="toolbar-btn" title="Configurações de Chaves API e Temperatura">
+                        <i data-lucide="settings"></i>
+                        <span>Configurações</span>
+                    </button>
+                </div>
+
+                <form id="chatForm" class="input-container">
+                    <textarea id="chatInput" placeholder="Pergunte sobre Python..." rows="1" required></textarea>
+                    <button type="submit" id="sendBtn" class="send-button">
+                        <i data-lucide="send"></i>
+                    </button>
+                </form>
+                <p class="disclaimer">A IA pode cometer erros. Sempre valide o código gerado.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay hidden" id="settingsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Configurações de IA</h3>
+                <button type="button" class="modal-close-btn" id="closeSettingsBtn">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- API Keys Group -->
+                <div class="settings-section">
+                    <h4>Chaves de API</h4>
+                    <p class="section-desc">Insira suas chaves de API. Elas são salvas com segurança localmente no seu navegador.</p>
+                    
+                    <div class="form-field">
+                        <label for="modalGroqKey">Chave API Groq</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="modalGroqKey" placeholder="gsk_...">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="modalOpenaiKey">Chave API OpenAI</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="modalOpenaiKey" placeholder="sk-...">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="modalGeminiKey">Chave API Gemini</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="modalGeminiKey" placeholder="AIzaSy...">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="modalAnthropicKey">Chave API Anthropic</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="modalAnthropicKey" placeholder="sk-ant-...">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label for="modalOpenrouterKey">Chave API OpenRouter</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="modalOpenrouterKey" placeholder="sk-or-...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temperature Slider -->
+                <div class="settings-section">
+                    <div class="range-labels">
+                        <label for="modalTemp">Temperatura (Criatividade)</label>
+                        <span id="modalTempVal">0.7</span>
+                    </div>
+                    <input type="range" id="modalTemp" min="0" max="1.5" step="0.1" value="0.7">
+                    <span class="help-text">Valores menores geram respostas mais precisas; valores maiores geram respostas mais criativas.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="saveSettingsBtn" class="btn btn-primary">Salvar e Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Prism.js for code highlight -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <!-- App script -->
+    <script src="main.js"></script>
+</body>
+</html>
