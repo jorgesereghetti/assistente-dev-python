@@ -3,123 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyCoder - Assistente Python</title>
+    <title>Coder - Assistente Dev</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Prism.js Dark Theme -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- Clean Standalone Vanilla CSS (v2.0.0) -->
+    <link rel="stylesheet" href="style.css?v=2.0.0">
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <div class="app-container">
+    <div class="app-container" id="appContainer">
+        
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
+            <!-- Sidebar Header -->
             <div class="sidebar-header">
-                <button class="toggle-sidebar-btn" id="toggleSidebarBtnSidebar" title="Recolher Barra Lateral">
-                    <i data-lucide="panel-left"></i>
+                <button id="newChatBtn" type="button" class="btn-new-chat">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="btn-new-chat-icon">
+                            <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                        </span>
+                        <span>Nova Conversa</span>
+                    </div>
                 </button>
-                <div class="logo">
-                    <i data-lucide="terminal" class="logo-icon"></i>
-                    <span>PyCoder</span>
-                </div>
-                <button class="mobile-close-btn" id="mobileCloseBtn">
-                    <i data-lucide="x"></i>
+                <button id="mobileCloseBtn" type="button" class="btn-terminal" style="display: none;">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
 
+            <!-- Sidebar Content -->
             <div class="sidebar-content">
-                <button id="newChatBtn" class="btn btn-primary btn-new-chat">
-                    <i data-lucide="plus"></i>
-                    Nova Conversa
-                </button>
-                
-                <hr class="divider">
-                
                 <div class="history-section">
-                    <h3>Conversas Recentes</h3>
+                    <div class="history-section-title">Recentes</div>
                     <div class="history-list" id="historyList">
                         <!-- Populated dynamically by main.js -->
                     </div>
                 </div>
+            </div>
 
-                <div class="sidebar-footer" style="margin-top: auto;">
-                    <p>Desenvolvido para auxiliar nas suas dúvidas em Python.</p>
-                    <a href="https://github.com/jorgesereghetti" target="_blank" class="dsa-link">
-                        <i data-lucide="github"></i>
-                        jorgesereghetti
-                    </a>
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <!-- Model Selector Dropdown Trigger -->
+                <div class="model-dropdown-container">
+                    <button type="button" id="modelSelectorBtn" class="model-selector-btn">
+                        <span id="activeModelLabel" style="display: flex; align-items: center; gap: 6px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">Carregando...</span>
+                        <i data-lucide="chevron-down" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+                    </button>
+                    <div class="model-dropdown-menu hidden" id="modelDropdownMenu">
+                        <!-- Populated dynamically by main.js -->
+                    </div>
                 </div>
+
+                <!-- Settings Button -->
+                <button type="button" id="settingsBtn" class="btn-settings" title="Configurações de Chaves API e Temperatura">
+                    <i data-lucide="settings" style="width: 15px; height: 15px;"></i>
+                    <span>Configurações</span>
+                </button>
             </div>
         </aside>
 
         <!-- Main Chat Area -->
-        <main class="chat-area">
-            <!-- Top bar -->
-            <header class="chat-header">
-                <button class="toggle-sidebar-btn" id="toggleSidebarBtn" title="Mostrar Barra Lateral">
-                    <i data-lucide="panel-left"></i>
-                </button>
-                <button class="mobile-toggle-btn" id="mobileToggleBtn">
-                    <i data-lucide="menu"></i>
-                </button>
-                <div class="header-title-container">
-                    <h2>Assistente Pessoal de Programação Python</h2>
-                    <span class="status-indicator">
-                        <span class="status-dot"></span>
-                        <span id="statusText">Pronto</span>
-                    </span>
-                </div>
-            </header>
+        <main class="chat-area" data-purpose="chat-interface">
+            
+            <!-- Hidden Status Elements for JS compatibility -->
+            <div class="hidden">
+                <span class="status-dot"></span>
+                <span id="statusText">Pronto</span>
+            </div>
 
-            <!-- Chat messages wrapper -->
+            <!-- Floating Sidebar Toggles -->
+            <button class="btn-toggle-sidebar" id="toggleSidebarBtn" title="Mostrar Barra Lateral">
+                <i data-lucide="panel-left" style="width: 18px; height: 18px;"></i>
+            </button>
+            <button class="btn-toggle-sidebar" id="mobileToggleBtn" title="Mostrar Barra Lateral" style="display: none;">
+                <i data-lucide="menu" style="width: 18px; height: 18px;"></i>
+            </button>
+
+            <!-- Messages Container -->
             <section class="messages-container" id="messagesContainer">
                 <!-- Welcome screen -->
                 <div class="welcome-screen" id="welcomeScreen">
-                    <div class="welcome-icon">
-                        <i data-lucide="bot"></i>
+                    <!-- Hero Icon Badge -->
+                    <div class="welcome-logo-box">
+                        <div class="welcome-logo-glow"></div>
+                        <div class="welcome-logo-inner">&lt;/&gt;</div>
                     </div>
-                    <h1>Olá! Sou o PyCoder.</h1>
-                    <p>Pergunte-me qualquer dúvida sobre Python, como sintaxe, estruturas de dados, algoritmos ou bibliotecas.</p>
-                    
-                </div>
+                    <!-- Title -->
+                    <h1 class="welcome-title">
+                        Olá, eu sou o <span class="welcome-title-gradient">Coder</span>
+                    </h1>
+                    <p class="welcome-desc">
+                        Como posso ajudar com sua programação Python hoje? Escolha uma sugestão ou digite sua dúvida abaixo.
+                    </p>
 
-                <!-- Chat history items will be rendered here -->
-            </section>
-
-            <!-- Chat input area -->
-            <footer class="input-area">
-                <div class="input-toolbar">
-                    <!-- Model Selector Dropdown Trigger -->
-                    <div class="model-dropdown-container">
-                        <button type="button" id="modelSelectorBtn" class="toolbar-btn">
-                            <i data-lucide="bot"></i>
-                            <span id="activeModelLabel">Carregando...</span>
-                            <i data-lucide="chevron-down" class="chevron-icon"></i>
-                        </button>
-                        <div class="model-dropdown-menu hidden" id="modelDropdownMenu">
-                            <!-- Populated dynamically by main.js -->
+                    <!-- Suggestion Cards Grid -->
+                    <div class="suggestion-cards-grid">
+                        <div class="suggestion-card" data-prompt="Refatore esta função Python para torná-la mais eficiente, legível e alinhada às regras do PEP 8:">
+                            <span class="suggestion-card-title">⚡ Refatorar Código</span>
+                            <span class="suggestion-card-desc">Otimizar performance, legibilidade e boas práticas.</span>
+                        </div>
+                        <div class="suggestion-card" data-prompt="Encontre e me ajude a solucionar um erro/exceção neste código Python:">
+                            <span class="suggestion-card-title">🐛 Corrigir Bugs</span>
+                            <span class="suggestion-card-desc">Identificar exceções, erros e aplicar correções.</span>
+                        </div>
+                        <div class="suggestion-card" data-prompt="Crie uma API RESTful completa em Python usando FastAPI, Pydantic e documentação Swagger:">
+                            <span class="suggestion-card-title">🚀 Criar API FastAPI</span>
+                            <span class="suggestion-card-desc">Estruturar rotas, schemas Pydantic e respostas HTTP.</span>
+                        </div>
+                        <div class="suggestion-card" data-prompt="Escreva um script em Python com Pandas para tratar, limpar e analisar um DataFrame de dados:">
+                            <span class="suggestion-card-title">📊 Análise de Dados</span>
+                            <span class="suggestion-card-desc">Tratamento, manipulação e análise com Pandas.</span>
                         </div>
                     </div>
-
-                    <!-- Settings Button -->
-                    <button type="button" id="settingsBtn" class="toolbar-btn" title="Configurações de Chaves API e Temperatura">
-                        <i data-lucide="settings"></i>
-                        <span>Configurações</span>
-                    </button>
                 </div>
+            </section>
 
-                <form id="chatForm" class="input-container">
-                    <textarea id="chatInput" placeholder="Pergunte sobre Python..." rows="1" required></textarea>
-                    <button type="submit" id="sendBtn" class="send-button">
-                        <i data-lucide="send"></i>
-                    </button>
+            <!-- Chat Input Area -->
+            <div class="chat-input-area">
+                <form id="chatForm" class="chat-form-box">
+                    <textarea id="chatInput" placeholder="Pergunte sobre código Python..." rows="1" required class="chat-input"></textarea>
+                    <div class="chat-actions">
+                        <button type="button" class="btn-terminal" title="Comando de Código">
+                            <i data-lucide="terminal" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <button type="submit" id="sendBtn" class="btn-send">
+                            <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </form>
-                <p class="disclaimer">A IA pode cometer erros. Sempre valide o código gerado.</p>
-            </footer>
+                <div class="keyboard-hint">
+                    Pressione <kbd>Enter ↵</kbd> para enviar, <kbd>Shift + Enter</kbd> para nova linha
+                </div>
+            </div>
         </main>
     </div>
 
@@ -129,69 +154,63 @@
             <div class="modal-header">
                 <h3>Configurações de IA</h3>
                 <button type="button" class="modal-close-btn" id="closeSettingsBtn">
-                    <i data-lucide="x"></i>
+                    <i data-lucide="x" style="width: 18px; height: 18px;"></i>
                 </button>
             </div>
             <div class="modal-body">
                 <!-- API Keys Group -->
-                <div class="settings-section">
-                    <h4>Chaves de API</h4>
-                    <p class="section-desc">Insira suas chaves de API. Elas são salvas com segurança localmente no seu navegador.</p>
+                <div class="form-field">
+                    <h4 style="font-size: 0.85rem; font-weight: 600; color: #ffffff; margin-bottom: 2px;">Chaves de API</h4>
+                    <p style="font-size: 0.72rem; color: var(--text-dim); margin-bottom: 12px;">Insira suas chaves de API. Elas são salvas com segurança localmente no seu navegador.</p>
                     
-                    <div class="form-field">
-                        <label for="modalGroqKey">Chave API Groq</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="modalGroqKey" placeholder="gsk_...">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div class="form-field">
+                            <label for="modalGroqKey">Chave API Groq</label>
+                            <input type="password" id="modalGroqKey" placeholder="gsk_..." class="form-input">
                         </div>
-                    </div>
-                    <div class="form-field">
-                        <label for="modalOpenaiKey">Chave API OpenAI</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="modalOpenaiKey" placeholder="sk-...">
+                        <div class="form-field">
+                            <label for="modalOpenaiKey">Chave API OpenAI</label>
+                            <input type="password" id="modalOpenaiKey" placeholder="sk-..." class="form-input">
                         </div>
-                    </div>
-                    <div class="form-field">
-                        <label for="modalGeminiKey">Chave API Gemini</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="modalGeminiKey" placeholder="AIzaSy...">
+                        <div class="form-field">
+                            <label for="modalGeminiKey">Chave API Gemini</label>
+                            <input type="password" id="modalGeminiKey" placeholder="AIzaSy..." class="form-input">
                         </div>
-                    </div>
-                    <div class="form-field">
-                        <label for="modalAnthropicKey">Chave API Anthropic</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="modalAnthropicKey" placeholder="sk-ant-...">
+                        <div class="form-field">
+                            <label for="modalAnthropicKey">Chave API Anthropic</label>
+                            <input type="password" id="modalAnthropicKey" placeholder="sk-ant-..." class="form-input">
                         </div>
-                    </div>
-                    <div class="form-field">
-                        <label for="modalOpenrouterKey">Chave API OpenRouter</label>
-                        <div class="password-wrapper">
-                            <input type="password" id="modalOpenrouterKey" placeholder="sk-or-...">
+                        <div class="form-field">
+                            <label for="modalOpenrouterKey">Chave API OpenRouter</label>
+                            <input type="password" id="modalOpenrouterKey" placeholder="sk-or-..." class="form-input">
                         </div>
                     </div>
                 </div>
 
                 <!-- Temperature Slider -->
-                <div class="settings-section">
-                    <div class="range-labels">
+                <div class="form-field" style="margin-top: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <label for="modalTemp">Temperatura (Criatividade)</label>
-                        <span id="modalTempVal">0.7</span>
+                        <span id="modalTempVal" style="font-size: 0.8rem; font-weight: 700; color: var(--purple-primary);">0.7</span>
                     </div>
-                    <input type="range" id="modalTemp" min="0" max="1.5" step="0.1" value="0.7">
-                    <span class="help-text">Valores menores geram respostas mais precisas; valores maiores geram respostas mais criativas.</span>
+                    <input type="range" id="modalTemp" min="0" max="1.5" step="0.1" value="0.7" style="width: 100%; accent-color: var(--purple-primary); cursor: pointer;">
+                    <span style="font-size: 0.68rem; color: var(--text-dim); margin-top: 4px;">Valores menores geram respostas mais precisas; valores maiores geram respostas mais criativas.</span>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="saveSettingsBtn" class="btn btn-primary">Salvar e Fechar</button>
+                <button type="button" id="saveSettingsBtn" class="btn-save">Salvar e Fechar</button>
             </div>
         </div>
     </div>
 
+    <!-- DOMPurify for sanitizing rendered markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
     <!-- Marked.js for markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Prism.js for code highlight -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <!-- App script -->
-    <script src="main.js"></script>
+    <script src="main.js?v=2.0.0"></script>
 </body>
 </html>

@@ -1,20 +1,35 @@
-# Segredos / ambiente
+# Environment secrets
 .env
 .env.*
 !.env.example
-*.key
 
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
 .venv/
 venv/
+env/
+ENV/
 
-# Ferramentas de dev / IA
-.claude/
-.planning/
+# IDE/editor
 .vscode/
+.idea/
+*.swp
+*.swo
 
-# Sistema
-Thumbs.db
+# OS
 .DS_Store
+Thumbs.db
+
+# Local build/runtime artifacts
+dist/
+build/
+*.log

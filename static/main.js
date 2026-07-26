@@ -40,6 +40,7 @@ const PROVIDER_MODELS = {
         { id: "claude-opus-4.1", name: "Claude Opus 4.1" }
     ],
     openrouter: [
+        { id: "nex-agi/nex-n2-pro:free", name: "Nex-N2-Pro (Grátis)" },
         { id: "openai/gpt-5", name: "GPT-5" },
         { id: "openai/gpt-5-pro", name: "GPT-5 Pro" },
         { id: "openai/o3-mini", name: "o3-mini" },
@@ -137,8 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load settings from localStorage
 function loadSettings() {
-    const savedProvider = localStorage.getItem('pycoder_provider');
-    const savedTemp = localStorage.getItem('pycoder_temperature');
+    const savedProvider = localStorage.getItem('dsa_provider');
+    const savedTemp = localStorage.getItem('dsa_temperature');
     
     if (savedProvider) {
         appState.provider = savedProvider;
@@ -149,7 +150,7 @@ function loadSettings() {
     }
 
     // Load appropriate model
-    const savedModel = localStorage.getItem(`pycoder_model_${appState.provider}`);
+    const savedModel = localStorage.getItem(`dsa_model_${appState.provider}`);
     if (savedModel) {
         appState.model = savedModel;
     } else {
@@ -159,7 +160,7 @@ function loadSettings() {
 
 // Load chats from localStorage
 function loadChats() {
-    const savedChats = localStorage.getItem('pycoder_chats');
+    const savedChats = localStorage.getItem('dsa_chats');
     if (savedChats) {
         try {
             appState.chats = JSON.parse(savedChats);
@@ -174,7 +175,7 @@ function loadChats() {
 
 // Save chats list to localStorage
 function saveChats() {
-    localStorage.setItem('pycoder_chats', JSON.stringify(appState.chats));
+    localStorage.setItem('dsa_chats', JSON.stringify(appState.chats));
 }
 
 
@@ -183,13 +184,22 @@ function saveChats() {
 function updateActiveModelBadge() {
     const activeModels = PROVIDER_MODELS[appState.provider] || [];
     const modelObj = activeModels.find(m => m.id === appState.model);
-    const modelLabel = modelObj ? modelObj.name : appState.model;
+    let modelLabel = modelObj ? modelObj.name : appState.model;
     const providerName = appState.provider.toUpperCase();
 
+    // Check if the model name is free
+    const isFree = modelLabel.toLowerCase().includes("grátis") || appState.model.toLowerCase().includes(":free");
+    
+    // Clean up "(Grátis)" from modelLabel for the badge display
+    modelLabel = modelLabel.replace(/\s*\(grátis\)/i, "");
 
-    // Input Toolbar Label
+    // Input Toolbar Label with status dot and inline free badge
     if (activeModelLabel) {
-        activeModelLabel.textContent = `${providerName}: ${modelLabel}`;
+        activeModelLabel.innerHTML = `
+            <span class="w-2 h-2 rounded-full bg-white inline-block shrink-0 animate-pulse"></span>
+            <span class="truncate max-w-[170px]">${providerName}: ${modelLabel}</span>
+            ${isFree ? '<span class="px-1.5 py-0.5 bg-white/10 border border-white/20 text-[9px] text-white font-bold uppercase rounded leading-none">Grátis</span>' : ''}
+        `;
     }
 }
 
@@ -212,13 +222,24 @@ function renderHistoryList() {
         item.className = `history-item ${chat.id === appState.activeChatId ? 'active' : ''}`;
         item.setAttribute('data-id', chat.id);
         
-        item.innerHTML = `
-            <i data-lucide="message-square" class="chat-icon"></i>
-            <span class="history-item-title">${chat.title}</span>
-            <button class="history-item-delete" title="Excluir Conversa">
-                <i data-lucide="trash"></i>
-            </button>
-        `;
+        const chatIcon = document.createElement('i');
+        chatIcon.setAttribute('data-lucide', 'message-square');
+        chatIcon.className = 'chat-icon';
+
+        const title = document.createElement('span');
+        title.className = 'history-item-title';
+        title.textContent = chat.title;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'history-item-delete';
+        deleteBtn.type = 'button';
+        deleteBtn.title = 'Excluir Conversa';
+
+        const deleteIcon = document.createElement('i');
+        deleteIcon.setAttribute('data-lucide', 'trash');
+        deleteBtn.appendChild(deleteIcon);
+
+        item.append(chatIcon, title, deleteBtn);
         
         // Load chat on click
         item.addEventListener('click', (e) => {
@@ -228,7 +249,6 @@ function renderHistoryList() {
         });
         
         // Delete chat on click
-        const deleteBtn = item.querySelector('.history-item-delete');
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             deleteConversation(chat.id);
@@ -254,9 +274,9 @@ function loadConversation(chatId) {
     appState.messages = [...chat.messages];
     
     // Sync models & keys
-    localStorage.setItem('pycoder_provider', appState.provider);
-    localStorage.setItem(`pycoder_model_${appState.provider}`, appState.model);
-    localStorage.setItem('pycoder_temperature', appState.temperature);
+    localStorage.setItem('dsa_provider', appState.provider);
+    localStorage.setItem(`dsa_model_${appState.provider}`, appState.model);
+    localStorage.setItem('dsa_temperature', appState.temperature);
     
     // Update UI elements
     updateActiveModelBadge();
@@ -281,6 +301,7 @@ function deleteConversation(chatId) {
         } else {
             renderHistoryList();
         }
+        showToast('Conversa excluída!');
     }
 }
 
@@ -290,7 +311,7 @@ function startNewConversation() {
     appState.messages = [];
     
     // Restore default settings of current active provider/model
-    const savedModel = localStorage.getItem(`pycoder_model_${appState.provider}`);
+    const savedModel = localStorage.getItem(`dsa_model_${appState.provider}`);
     if (savedModel) {
         appState.model = savedModel;
     } else {
@@ -346,8 +367,8 @@ function selectModel(providerId, modelId) {
     appState.provider = providerId;
     appState.model = modelId;
     
-    localStorage.setItem('pycoder_provider', providerId);
-    localStorage.setItem(`pycoder_model_${providerId}`, modelId);
+    localStorage.setItem('dsa_provider', providerId);
+    localStorage.setItem(`dsa_model_${providerId}`, modelId);
     
     // If active conversation exists, update its configuration
     if (appState.activeChatId) {
@@ -364,6 +385,52 @@ function selectModel(providerId, modelId) {
     
     // Re-populate dropdown to refresh active state
     populateModelDropdown();
+
+    // Show confirmation toast
+    const providerName = providerId.toUpperCase();
+    const activeModels = PROVIDER_MODELS[providerId] || [];
+    const modelObj = activeModels.find(m => m.id === modelId);
+    const modelLabel = modelObj ? modelObj.name : modelId;
+    showToast(`Modelo alterado para ${providerName}: ${modelLabel}`);
+}
+
+// Show a temporary toast notification
+function showToast(message) {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="toast-icon">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span></span>
+    `;
+    toast.querySelector('span').textContent = message;
+    
+    container.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // Animate out and remove
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+            if (container.children.length === 0) {
+                container.remove();
+            }
+        }, 300);
+    }, 3000);
 }
 
 // Event Listeners Setup
@@ -397,6 +464,7 @@ function setupEventListeners() {
     if (newChatBtn) {
         newChatBtn.addEventListener('click', () => {
             startNewConversation();
+            showToast('Nova conversa iniciada!');
         });
     }
 
@@ -457,6 +525,19 @@ function setupEventListeners() {
         });
     }
 
+    // Interactive Suggestion Cards click handler
+    document.querySelectorAll('.suggestion-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const prompt = card.getAttribute('data-prompt');
+            if (prompt && chatInput) {
+                chatInput.value = prompt + ' ';
+                chatInput.style.height = 'auto';
+                chatInput.style.height = (chatInput.scrollHeight) + 'px';
+                chatInput.focus();
+            }
+        });
+    });
+
     // Auto-growing chat input textarea
     if (chatInput) {
         chatInput.addEventListener('input', function() {
@@ -492,11 +573,11 @@ function setupEventListeners() {
 // Open Settings Modal & Populate Values from LocalStorage
 function openSettingsModal() {
     // Load keys
-    modalGroqKey.value = localStorage.getItem('pycoder_key_groq') || '';
-    modalOpenaiKey.value = localStorage.getItem('pycoder_key_openai') || '';
-    modalGeminiKey.value = localStorage.getItem('pycoder_key_gemini') || '';
-    modalAnthropicKey.value = localStorage.getItem('pycoder_key_anthropic') || '';
-    modalOpenrouterKey.value = localStorage.getItem('pycoder_key_openrouter') || '';
+    modalGroqKey.value = localStorage.getItem('dsa_key_groq') || '';
+    modalOpenaiKey.value = localStorage.getItem('dsa_key_openai') || '';
+    modalGeminiKey.value = localStorage.getItem('dsa_key_gemini') || '';
+    modalAnthropicKey.value = localStorage.getItem('dsa_key_anthropic') || '';
+    modalOpenrouterKey.value = localStorage.getItem('dsa_key_openrouter') || '';
     
     // Load temperature
     modalTemp.value = appState.temperature;
@@ -517,14 +598,14 @@ function closeSettingsModal() {
 
 // Save Modal values to LocalStorage and State
 function saveModalSettings() {
-    localStorage.setItem('pycoder_key_groq', modalGroqKey.value.trim());
-    localStorage.setItem('pycoder_key_openai', modalOpenaiKey.value.trim());
-    localStorage.setItem('pycoder_key_gemini', modalGeminiKey.value.trim());
-    localStorage.setItem('pycoder_key_anthropic', modalAnthropicKey.value.trim());
-    localStorage.setItem('pycoder_key_openrouter', modalOpenrouterKey.value.trim());
+    localStorage.setItem('dsa_key_groq', modalGroqKey.value.trim());
+    localStorage.setItem('dsa_key_openai', modalOpenaiKey.value.trim());
+    localStorage.setItem('dsa_key_gemini', modalGeminiKey.value.trim());
+    localStorage.setItem('dsa_key_anthropic', modalAnthropicKey.value.trim());
+    localStorage.setItem('dsa_key_openrouter', modalOpenrouterKey.value.trim());
     
     appState.temperature = parseFloat(modalTemp.value);
-    localStorage.setItem('pycoder_temperature', appState.temperature);
+    localStorage.setItem('dsa_temperature', appState.temperature);
     
     // If active conversation exists, update its temperature configuration
     if (appState.activeChatId) {
@@ -537,6 +618,7 @@ function saveModalSettings() {
     
     // Sync status indicators
     closeSettingsModal();
+    showToast('Configurações salvas!');
 }
 
 // Set UI Status
@@ -569,36 +651,47 @@ function renderMessages() {
     welcomeScreen.style.display = 'none';
 
     appState.messages.forEach(msg => {
-        appendMessageRow(msg.role, msg.content);
+        appendMessageRow(msg.role, msg.content, msg.modelLabel);
     });
 
     scrollToBottom();
 }
 
-function appendMessageRow(role, content) {
+function appendMessageRow(role, content, modelLabel = null) {
     const row = document.createElement('div');
     row.className = `message-row ${role}`;
 
     const isUser = role === 'user';
     const avatarIcon = isUser ? 'user' : 'bot';
-    const senderLabel = isUser ? 'Você' : 'PyCoder';
+    const senderLabel = isUser ? 'Você' : 'Coder';
+
+    let modelBadgeHtml = '';
+    if (!isUser && modelLabel) {
+        modelBadgeHtml = `<span class="model-badge-info">${modelLabel}</span>`;
+    }
 
     // Render markdown to HTML
     let renderedHtml = content;
     if (window.marked) {
         try {
-            renderedHtml = window.marked.parse(content);
+            renderedHtml = sanitizeHtml(window.marked.parse(content));
         } catch (e) {
             console.error("Markdown rendering error:", e);
+            renderedHtml = sanitizeHtml(content);
         }
+    } else {
+        renderedHtml = sanitizeHtml(content);
     }
 
     row.innerHTML = `
         <div class="avatar">
-            <i data-lucide="${avatarIcon}"></i>
+            ${isUser ? '<i data-lucide="user"></i>' : '<span class="font-mono text-xs font-extrabold select-none">&lt;\\&gt;</span>'}
         </div>
         <div class="message-content-wrapper">
-            <span class="sender-name">${senderLabel}</span>
+            <div class="sender-header">
+                <span class="sender-name">${senderLabel}</span>
+                ${modelBadgeHtml}
+            </div>
             <div class="message-body">${renderedHtml}</div>
         </div>
     `;
@@ -679,10 +772,10 @@ function showTypingIndicator() {
     row.className = 'message-row assistant typing-row';
     row.innerHTML = `
         <div class="avatar">
-            <i data-lucide="bot"></i>
+            <span class="font-mono text-xs font-extrabold select-none">&lt;\\&gt;</span>
         </div>
         <div class="message-content-wrapper">
-            <span class="sender-name">PyCoder</span>
+            <span class="sender-name">Coder</span>
             <div class="typing-indicator">
                 <div class="typing-dot"></div>
                 <div class="typing-dot"></div>
@@ -708,9 +801,19 @@ function scrollToBottom() {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
+function sanitizeHtml(html) {
+    if (window.DOMPurify) {
+        return window.DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+    }
+
+    return String(html)
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/\son\w+="[^"]*"/g, '');
+}
+
 // Send user message to the API
 async function sendMessage(text) {
-    const apiKey = localStorage.getItem(`pycoder_key_${appState.provider}`);
+    const apiKey = localStorage.getItem(`dsa_key_${appState.provider}`);
     if (!apiKey || apiKey.trim() === '') {
         alert(`Por favor, insira a sua API Key para o provedor ${appState.provider.toUpperCase()} nas Configurações.`);
         openSettingsModal();
@@ -755,9 +858,15 @@ async function sendMessage(text) {
 
         const aiResponse = data.response;
         
+        // Find human readable label for the model
+        const activeModels = PROVIDER_MODELS[appState.provider] || [];
+        const modelObj = activeModels.find(m => m.id === appState.model);
+        const modelLabel = modelObj ? modelObj.name : appState.model;
+        const fullModelLabel = `${appState.provider.toUpperCase()}: ${modelLabel}`;
+
         // Add response to messages
-        appState.messages.push({ role: 'assistant', content: aiResponse });
-        appendMessageRow('assistant', aiResponse);
+        appState.messages.push({ role: 'assistant', content: aiResponse, modelLabel: fullModelLabel });
+        appendMessageRow('assistant', aiResponse, fullModelLabel);
         setStatus('Pronto', 'success');
 
         // Manage history lists saving

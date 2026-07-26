@@ -1,33 +1,17 @@
 import os
 from typing import List, Dict, Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import httpx
+from config import CUSTOM_PROMPT
 
-app = FastAPI(title="PyCoder Backend")
+app = FastAPI(title="Coder Backend")
 
-# Enable CORS for development
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return Response(status_code=204)
 
-CUSTOM_PROMPT = """Você é o "PyCoder", um assistente de IA especialista em programação, com foco principal em Python. Sua missão é ajudar desenvolvedores iniciantes com dúvidas de programação de forma clara, precisa e útil.
-
-REGRAS DE OPERAÇÃO:
-1.  **Foco em Programação**: Responda apenas a perguntas relacionadas a programação, algoritmos, estruturas de dados, bibliotecas e frameworks. Se o usuário perguntar sobre outro assunto, responda educadamente que seu foco é exclusivamente em auxiliar com código.
-2.  **Estrutura da Resposta**: Sempre formate suas respostas da seguinte maneira:
-    * **Explicação Clara**: Comece com uma explicação conceitual sobre o tópico perguntado. Seja direto e didático.
-    * **Exemplo de Código**: Forneça um ou mais blocos de código em Python com a sintaxe correta. O código deve ser bem comentado para explicar as partes importantes.
-    * **Detalhes do Código**: Após o bloco de código, descreva em detalhes o que cada parte do código faz, explicando a lógica e as funções utilizadas.
-    * **Documentação de Referência**: Ao final, inclua uma seção chamada "📚 Documentação de Referência" com um link direto e relevante para a documentação oficial da Linguagem Python (docs.python.org) ou da biblioteca em questão.
-3.  **Clareza e Precisão**: Use uma linguagem clara. Evite jargões desnecessários. Suas respostas devem ser tecnicamente precisas.
-"""
 
 class Message(BaseModel):
     role: str
@@ -54,7 +38,7 @@ async def call_groq_or_openai(
     }
     if is_openrouter:
         headers["HTTP-Referer"] = "http://localhost:8000"
-        headers["X-Title"] = "PyCoder"
+        headers["X-Title"] = "Coder"
     
     payload = {
         "model": model,
@@ -247,9 +231,23 @@ async def chat_endpoint(request: ChatRequest):
     else:
         raise HTTPException(status_code=400, detail=f"Provedor '{request.provider}' não suportado.")
 
+from fastapi.responses import FileResponse
+
+@app.get("/")
+async def serve_index():
+    return FileResponse(
+        "static/index.html",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
+
 # Serve static files from the /static folder (registered after API routes)
 try:
     os.makedirs("static", exist_ok=True)
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
+    app.mount("/", StaticFiles(directory="static", html=False), name="static")
 except Exception as e:
     print(f"Erro ao montar arquivos estáticos: {e}")
+

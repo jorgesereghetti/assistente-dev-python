@@ -1,3 +1,0 @@
-# Ignorar arquivos do frontend estático nas estatísticas de linguagem do GitHub
-# Isso garante que o repositório seja corretamente classificado como Python.
-static/** linguist-vendored
